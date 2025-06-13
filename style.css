@@ -16,7 +16,6 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    animation: fadeIn 1.2s cubic-bezier(.68,-0.55,.27,1.55);
     border: 2px solid #0f0;
     position: relative;
     max-width: 98vw;
@@ -31,8 +30,8 @@ body {
         padding: 3px 8px;
     }
     canvas {
-        width: 90vw !important;
-        height: 90vw !important;
+        width: 94vw !important;
+        height: 94vw !important;
         max-width: 98vw !important;
         max-height: 98vw !important;
     }
@@ -51,7 +50,6 @@ h1 {
     letter-spacing: 0.12em;
     margin: 0 0 10px 0;
     text-shadow: 0 0 16px #0f0, 0 0 2px #fff;
-    animation: glow 2s infinite alternate;
     user-select: none;
 }
 h2#startMsg {
@@ -62,10 +60,6 @@ h2#startMsg {
     letter-spacing: 0.06em;
     text-shadow: 0 0 8px #0f0;
     transition: opacity 0.3s;
-}
-@keyframes glow {
-    from { text-shadow: 0 0 8px #0f0, 0 0 2px #fff; }
-    to { text-shadow: 0 0 32px #0f0, 0 0 12px #fff; }
 }
 #score {
     color: #0f0;
@@ -108,8 +102,8 @@ h2#startMsg {
     100% { transform: scale(1);}
 }
 canvas {
-    width: 90vw !important;
-    height: 90vw !important;
+    width: 94vw !important;
+    height: 94vw !important;
     max-width: 400px;
     max-height: 400px;
     display: block;
@@ -118,6 +112,7 @@ canvas {
     border-radius: 16px;
     box-shadow: 0 0 32px #0f04, 0 0 8px #0f0;
     touch-action: none;
+    background: #181;
 }
 @media (min-width: 600px) {
     canvas {
