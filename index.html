@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Snake Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🐍 Snake Game </h1>
+        <h2 id="startMsg">Press any arrow key to start</h2>
+        <div id="score">Score: 0</div>
+        <canvas id="game" width="400" height="400"></canvas>
+        <div class="mobile-controls">
+            <div class="mobile-row">
+                <button class="mobile-btn" id="btnUp">▲</button>
+            </div>
+            <div class="mobile-row">
+                <button class="mobile-btn" id="btnLeft">◀</button>
+                <button class="mobile-btn" id="btnDown">▼</button>
+                <button class="mobile-btn" id="btnRight">▶</button>
+            </div>
+        </div>
+        <button id="resetBtn">Reset Game</button>
+        <div class="footer">
+            Use your arrow keys or buttons to play.<br>
+            Eat the red food to grow and speed up.<br>
+            <span style="color:#0f0">Try to beat your high score!</span>
+        </div>
+        <div class="credit">by beshoy rezk</div>
+        <audio id="eatSound" src="https://cdn.pixabay.com/audio/2022/07/26/audio_124bfae1e6.mp3" preload="auto"></audio>
+        <audio id="gameOverSound" src="https://cdn.pixabay.com/audio/2022/07/26/audio_124bfae1e6.mp3" preload="auto"></audio>
+    </div>
+<script src="script.js"></script>
+</body>
+</html>
