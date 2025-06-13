@@ -2,35 +2,48 @@
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const box = 20;
+const GRID_SIZE = 20;
 let snake = [{x: 9 * box, y: 10 * box}];
 let direction = 'RIGHT';
-let food = {
-    x: Math.floor(Math.random() * 20) * box,
-    y: Math.floor(Math.random() * 20) * box
-};
+
+// Food always spawns inside the grid and not on the snake
+function getRandomFoodPosition() {
+    let pos;
+    do {
+        pos = {
+            x: Math.floor(Math.random() * GRID_SIZE) * box,
+            y: Math.floor(Math.random() * GRID_SIZE) * box
+        };
+    } while (collision(pos, snake));
+    return pos;
+}
+let food = getRandomFoodPosition();
+
 let score = 0;
 let highScore = localStorage.getItem('snakeHighScore') || 0;
 let gameOver = false;
-let speed = 200; // Start slow
+let speed = 200;
 let game = null;
 let started = false;
 const eatSound = document.getElementById('eatSound');
 const gameOverSound = document.getElementById('gameOverSound');
 let brokeHighScore = false;
 
-// Responsive canvas for high-DPI screens
+// Responsive canvas for high-DPI screens and mobile
 function resizeCanvas() {
+    // Always use a size that's a multiple of box and fits the screen
     let size = Math.min(window.innerWidth, window.innerHeight, 400);
-    canvas.width = size * window.devicePixelRatio;
-    canvas.height = size * window.devicePixelRatio;
+    size = Math.floor(size / box) * box;
+    canvas.width = size;
+    canvas.height = size;
     canvas.style.width = size + "px";
     canvas.style.height = size + "px";
-    ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// Prevent scrolling on mobile when swiping on canvas or controls
+// Prevent scrolling/zooming on mobile when swiping on canvas or controls
 ['touchstart', 'touchmove', 'touchend'].forEach(evt => {
     document.body.addEventListener(evt, function(e) {
         if (e.target === canvas || (e.target.classList && e.target.classList.contains('mobile-btn'))) {
@@ -53,20 +66,15 @@ window.addEventListener('DOMContentLoaded', () => {
 document.getElementById('score').innerText = `Score: 0 | High: ${highScore}`;
 
 document.addEventListener('keydown', function(e) {
-    // Allow arrow keys to start or restart the game
     if (['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown'].includes(e.key)) {
         const startMsg = document.getElementById('startMsg');
         if (startMsg && startMsg.style.display !== 'none') {
             startMsg.style.display = 'none';
         }
         if (!started || gameOver) {
-            // Reset everything if game is over or not started
             snake = [{x: 9 * box, y: 10 * box}];
             direction = 'RIGHT';
-            food = {
-                x: Math.floor(Math.random() * 20) * box,
-                y: Math.floor(Math.random() * 20) * box
-            };
+            food = getRandomFoodPosition();
             score = 0;
             gameOver = false;
             speed = 200;
@@ -86,7 +94,6 @@ document.addEventListener('keydown', function(e) {
 
 // Mobile controls
 function mobileDir(dirKey) {
-    // Simulate keydown for mobile
     const e = {key: dirKey};
     const startMsg = document.getElementById('startMsg');
     if (startMsg && startMsg.style.display !== 'none') {
@@ -95,10 +102,7 @@ function mobileDir(dirKey) {
     if (!started || gameOver) {
         snake = [{x: 9 * box, y: 10 * box}];
         direction = 'RIGHT';
-        food = {
-            x: Math.floor(Math.random() * 20) * box,
-            y: Math.floor(Math.random() * 20) * box
-        };
+        food = getRandomFoodPosition();
         score = 0;
         gameOver = false;
         speed = 200;
@@ -118,8 +122,6 @@ document.getElementById('btnUp').addEventListener('touchstart', e => { e.prevent
 document.getElementById('btnDown').addEventListener('touchstart', e => { e.preventDefault(); mobileDir('ArrowDown'); });
 document.getElementById('btnLeft').addEventListener('touchstart', e => { e.preventDefault(); mobileDir('ArrowLeft'); });
 document.getElementById('btnRight').addEventListener('touchstart', e => { e.preventDefault(); mobileDir('ArrowRight'); });
-
-// Also support mouse click for mobile buttons (for emulators)
 document.getElementById('btnUp').addEventListener('mousedown', e => { e.preventDefault(); mobileDir('ArrowUp'); });
 document.getElementById('btnDown').addEventListener('mousedown', e => { e.preventDefault(); mobileDir('ArrowDown'); });
 document.getElementById('btnLeft').addEventListener('mousedown', e => { e.preventDefault(); mobileDir('ArrowLeft'); });
@@ -134,7 +136,7 @@ function dir(e) {
 
 function increaseSpeed() {
     clearInterval(game);
-    speed = Math.max(50, 200 - score * 10); // Speed up as score increases
+    speed = Math.max(50, 200 - score * 10);
     game = setInterval(draw, speed);
 }
 
@@ -216,7 +218,6 @@ function draw() {
         else {
             ctx.save();
 
-            // Calculate the direction from previous and next segments
             let prev = snake[i - 1];
             let next = snake[i + 1] || segment;
 
@@ -225,15 +226,12 @@ function draw() {
             let dxNext = next.x - segment.x;
             let dyNext = next.y - segment.y;
 
-            // Calculate angle for the curve
             let anglePrev = Math.atan2(dyPrev, dxPrev);
             let angleNext = Math.atan2(dyNext, dxNext);
             let midAngle = (anglePrev + angleNext) / 2;
 
-            // Animate the curve with a sine wave for a wavy effect
             let wave = Math.sin(Date.now() / 120 + i) * 4 * (i % 2 === 0 ? 1 : -1);
 
-            // Offset the body ellipse center for the curve
             let cx = segment.x + box / 2 + Math.cos(midAngle + Math.PI / 2) * wave;
             let cy = segment.y + box / 2 + Math.sin(midAngle + Math.PI / 2) * wave;
 
@@ -247,7 +245,6 @@ function draw() {
                 0,
                 2 * Math.PI
             );
-            // Subtle gradient for a more natural look
             let grad = ctx.createRadialGradient(
                 cx, cy, box / 4,
                 cx, cy, box / 2
@@ -255,7 +252,7 @@ function draw() {
             grad.addColorStop(0, "#6f6");
             grad.addColorStop(1, "#191");
             ctx.fillStyle = grad;
-            ctx.globalAlpha = i === snake.length - 1 ? 0.7 : 1; // tail is a bit transparent
+            ctx.globalAlpha = i === snake.length - 1 ? 0.7 : 1;
             ctx.fill();
             ctx.globalAlpha = 1;
             ctx.restore();
@@ -272,7 +269,6 @@ function draw() {
     ctx.fill();
     ctx.restore();
 
-    // Don't move until started
     if (!started) return;
 
     // Move snake
@@ -284,12 +280,14 @@ function draw() {
     if (direction === 'RIGHT') headX += box;
     if (direction === 'DOWN') headY += box;
 
-    // Check collision with walls or self (use grid size, not canvas size!)
-    if (
-        headX < 0 || headX >= box * 20 ||
-        headY < 0 || headY >= box * 20 ||
-        collision({x: headX, y: headY}, snake)
-    ) {
+    // WRAP-AROUND LOGIC (NO WALLS)
+    if (headX < 0) headX = (GRID_SIZE - 1) * box;
+    if (headX >= box * GRID_SIZE) headX = 0;
+    if (headY < 0) headY = (GRID_SIZE - 1) * box;
+    if (headY >= box * GRID_SIZE) headY = 0;
+
+    // Check collision with self only
+    if (collision({x: headX, y: headY}, snake)) {
         clearInterval(game);
         gameOver = true;
         if (score > highScore) {
@@ -302,7 +300,6 @@ function draw() {
         gameOverSound.play();
         brokeHighScore = false;
         started = false;
-        // Show the restart message
         const startMsg = document.getElementById('startMsg');
         if (startMsg) {
             startMsg.innerText = "Press any arrow key to start playing again";
@@ -318,26 +315,18 @@ function draw() {
         popScoreEffect();
         eatSound.currentTime = 0;
         eatSound.play();
-        // Animate high score if just broken
         if (score > highScore && !brokeHighScore) {
             highScore = score;
             localStorage.setItem('snakeHighScore', highScore);
             highScoreEffect();
             brokeHighScore = true;
         }
-        // Make sure food doesn't spawn on the snake
-        do {
-            food = {
-                x: Math.floor(Math.random() * 20) * box,
-                y: Math.floor(Math.random() * 20) * box
-            };
-        } while (collision(food, snake));
-        increaseSpeed(); // Speed up as score increases
+        food = getRandomFoodPosition();
+        increaseSpeed();
     } else {
         snake.pop();
     }
 
-    // Add new head
     snake.unshift({x: headX, y: headY});
 }
 
@@ -350,15 +339,10 @@ function collision(head, array) {
     return false;
 }
 
-// Reset button logic
 document.getElementById('resetBtn').onclick = function() {
-    // Reset all game state as if the page was just opened (except high score)
     snake = [{x: 9 * box, y: 10 * box}];
     direction = 'RIGHT';
-    food = {
-        x: Math.floor(Math.random() * 20) * box,
-        y: Math.floor(Math.random() * 20) * box
-    };
+    food = getRandomFoodPosition();
     score = 0;
     gameOver = false;
     speed = 200;
@@ -367,13 +351,10 @@ document.getElementById('resetBtn').onclick = function() {
     document.getElementById('score').innerText = `Score: 0 | High: ${highScore}`;
     clearInterval(game);
 
-    // Show the initial start message
     const startMsg = document.getElementById('startMsg');
     if (startMsg) {
         startMsg.innerText = "Press any arrow key to start";
         startMsg.style.display = '';
     }
-
-    // Optionally, clear the canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 };
