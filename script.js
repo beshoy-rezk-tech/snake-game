@@ -345,7 +345,3 @@ document.getElementById('resetBtn').onclick = function() {
     // Optionally, clear the canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 };
-
-    // Optionally, clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-};
