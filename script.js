@@ -121,51 +121,112 @@ function highScoreEffect() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw snake with rounded corners and gradient
+    // Draw snake with animated body curve based on direction
     for (let i = 0; i < snake.length; i++) {
         let segment = snake[i];
-        let grad = ctx.createLinearGradient(segment.x, segment.y, segment.x + box, segment.y + box);
-        grad.addColorStop(0, i === 0 ? '#0f0' : '#fff');
-        grad.addColorStop(1, '#222');
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.moveTo(segment.x + 4, segment.y);
-        ctx.lineTo(segment.x + box - 4, segment.y);
-        ctx.quadraticCurveTo(segment.x + box, segment.y, segment.x + box, segment.y + 4);
-        ctx.lineTo(segment.x + box, segment.y + box - 4);
-        ctx.quadraticCurveTo(segment.x + box, segment.y + box, segment.x + box - 4, segment.y + box);
-        ctx.lineTo(segment.x + 4, segment.y + box);
-        ctx.quadraticCurveTo(segment.x, segment.y + box, segment.x, segment.y + box - 4);
-        ctx.lineTo(segment.x, segment.y + 4);
-        ctx.quadraticCurveTo(segment.x, segment.y, segment.x + 4, segment.y);
-        ctx.closePath();
-        ctx.shadowColor = "#0f0";
-        ctx.shadowBlur = i === 0 ? 14 : 0;
-        ctx.fill();
-        ctx.shadowBlur = 0;
 
-        // Draw eyes on the head
+        // Head
         if (i === 0) {
-            ctx.fillStyle = '#000';
-            let eyeOffsetX = direction === 'LEFT' ? 4 : direction === 'RIGHT' ? 12 : 4;
-            let eyeOffsetY = direction === 'UP' ? 4 : direction === 'DOWN' ? 12 : 4;
+            ctx.save();
             ctx.beginPath();
-            ctx.arc(segment.x + eyeOffsetX, segment.y + eyeOffsetY, 2, 0, 2 * Math.PI);
-            ctx.arc(segment.x + box - eyeOffsetX, segment.y + eyeOffsetY, 2, 0, 2 * Math.PI);
+            ctx.arc(segment.x + box / 2, segment.y + box / 2, box / 2, 0, 2 * Math.PI);
+            ctx.fillStyle = "#3c3";
+            ctx.shadowColor = "#0f0";
+            ctx.shadowBlur = 16;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Eyes (forward facing)
+            ctx.fillStyle = "#111";
+            let eyeOffset = box * 0.18;
+            let eyeX1 = segment.x + box / 2 + (direction === 'LEFT' ? -eyeOffset : direction === 'RIGHT' ? eyeOffset : -eyeOffset);
+            let eyeY1 = segment.y + box / 2 + (direction === 'UP' ? -eyeOffset : direction === 'DOWN' ? eyeOffset : -eyeOffset);
+            let eyeX2 = segment.x + box / 2 + (direction === 'LEFT' ? -eyeOffset : direction === 'RIGHT' ? eyeOffset : eyeOffset);
+            let eyeY2 = segment.y + box / 2 + (direction === 'UP' ? -eyeOffset : direction === 'DOWN' ? eyeOffset : eyeOffset);
+            ctx.beginPath();
+            ctx.arc(eyeX1, eyeY1, 2.5, 0, 2 * Math.PI);
+            ctx.arc(eyeX2, eyeY2, 2.5, 0, 2 * Math.PI);
             ctx.fill();
 
-            // Animate tongue flick
+            // Nostrils
+            ctx.fillStyle = "#191";
+            ctx.beginPath();
+            ctx.arc(segment.x + box / 2 - 3, segment.y + box / 2 + 6, 1, 0, 2 * Math.PI);
+            ctx.arc(segment.x + box / 2 + 3, segment.y + box / 2 + 6, 1, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Forked tongue
             if (!gameOver && Math.floor(Date.now() / 200) % 2 === 0) {
                 ctx.strokeStyle = "#f44";
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 1.5;
                 ctx.beginPath();
-                let tx = segment.x + box / 2 + (direction === 'LEFT' ? -8 : direction === 'RIGHT' ? 8 : 0);
-                let ty = segment.y + box / 2 + (direction === 'UP' ? -8 : direction === 'DOWN' ? 8 : 0);
+                let tx = segment.x + box / 2 + (direction === 'LEFT' ? -box / 1.5 : direction === 'RIGHT' ? box / 1.5 : 0);
+                let ty = segment.y + box / 2 + (direction === 'UP' ? -box / 1.5 : direction === 'DOWN' ? box / 1.5 : 0);
                 ctx.moveTo(segment.x + box / 2, segment.y + box / 2);
                 ctx.lineTo(tx, ty);
+                // Fork
+                if (direction === 'LEFT' || direction === 'RIGHT') {
+                    ctx.moveTo(tx, ty);
+                    ctx.lineTo(tx, ty - 4);
+                    ctx.moveTo(tx, ty);
+                    ctx.lineTo(tx, ty + 4);
+                } else {
+                    ctx.moveTo(tx, ty);
+                    ctx.lineTo(tx - 4, ty);
+                    ctx.moveTo(tx, ty);
+                    ctx.lineTo(tx + 4, ty);
+                }
                 ctx.stroke();
-                ctx.lineWidth = 1;
             }
+            ctx.restore();
+        }
+        // Body with curve animation
+        else {
+            ctx.save();
+
+            // Calculate the direction from previous and next segments
+            let prev = snake[i - 1];
+            let next = snake[i + 1] || segment;
+
+            let dxPrev = segment.x - prev.x;
+            let dyPrev = segment.y - prev.y;
+            let dxNext = next.x - segment.x;
+            let dyNext = next.y - segment.y;
+
+            // Calculate angle for the curve
+            let anglePrev = Math.atan2(dyPrev, dxPrev);
+            let angleNext = Math.atan2(dyNext, dxNext);
+            let midAngle = (anglePrev + angleNext) / 2;
+
+            // Animate the curve with a sine wave for a wavy effect
+            let wave = Math.sin(Date.now() / 120 + i) * 4 * (i % 2 === 0 ? 1 : -1);
+
+            // Offset the body ellipse center for the curve
+            let cx = segment.x + box / 2 + Math.cos(midAngle + Math.PI / 2) * wave;
+            let cy = segment.y + box / 2 + Math.sin(midAngle + Math.PI / 2) * wave;
+
+            ctx.beginPath();
+            ctx.ellipse(
+                cx,
+                cy,
+                box / 2.15,
+                box / 2.5,
+                midAngle,
+                0,
+                2 * Math.PI
+            );
+            // Subtle gradient for a more natural look
+            let grad = ctx.createRadialGradient(
+                cx, cy, box / 4,
+                cx, cy, box / 2
+            );
+            grad.addColorStop(0, "#6f6");
+            grad.addColorStop(1, "#191");
+            ctx.fillStyle = grad;
+            ctx.globalAlpha = i === snake.length - 1 ? 0.7 : 1; // tail is a bit transparent
+            ctx.fill();
+            ctx.globalAlpha = 1;
+            ctx.restore();
         }
     }
 
@@ -280,6 +341,10 @@ document.getElementById('resetBtn').onclick = function() {
         startMsg.innerText = "Press any arrow key to start";
         startMsg.style.display = '';
     }
+
+    // Optionally, clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+};
 
     // Optionally, clear the canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
