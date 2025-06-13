@@ -284,10 +284,10 @@ function draw() {
     if (direction === 'RIGHT') headX += box;
     if (direction === 'DOWN') headY += box;
 
-    // Check collision with walls or self
+    // Check collision with walls or self (use grid size, not canvas size!)
     if (
-        headX < 0 || headX >= canvas.width ||
-        headY < 0 || headY >= canvas.height ||
+        headX < 0 || headX >= box * 20 ||
+        headY < 0 || headY >= box * 20 ||
         collision({x: headX, y: headY}, snake)
     ) {
         clearInterval(game);
