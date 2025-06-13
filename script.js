@@ -20,11 +20,9 @@ let brokeHighScore = false;
 
 document.getElementById('score').innerText = `Score: 0 | High: ${highScore}`;
 
-// Keyboard controls (desktop)
 document.addEventListener('keydown', function(e) {
     // Allow arrow keys to start or restart the game
     if (['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown'].includes(e.key)) {
-        // Hide the start message if visible
         const startMsg = document.getElementById('startMsg');
         if (startMsg && startMsg.style.display !== 'none') {
             startMsg.style.display = 'none';
@@ -45,6 +43,10 @@ document.addEventListener('keydown', function(e) {
             document.getElementById('score').innerText = `Score: 0 | High: ${highScore}`;
             clearInterval(game);
             game = setInterval(draw, speed);
+            if (startMsg) {
+                startMsg.innerText = "Press any arrow key to start";
+                startMsg.style.display = 'none';
+            }
         }
         dir(e);
     }
@@ -54,7 +56,6 @@ document.addEventListener('keydown', function(e) {
 function mobileDir(dirKey) {
     // Simulate keydown for mobile
     const e = {key: dirKey};
-    // Hide the start message if visible
     const startMsg = document.getElementById('startMsg');
     if (startMsg && startMsg.style.display !== 'none') {
         startMsg.style.display = 'none';
@@ -74,6 +75,10 @@ function mobileDir(dirKey) {
         document.getElementById('score').innerText = `Score: 0 | High: ${highScore}`;
         clearInterval(game);
         game = setInterval(draw, speed);
+        if (startMsg) {
+            startMsg.innerText = "Press any arrow key to start";
+            startMsg.style.display = 'none';
+        }
     }
     dir(e);
 }
@@ -204,6 +209,12 @@ function draw() {
         gameOverSound.play();
         brokeHighScore = false;
         started = false;
+        // Show the restart message
+        const startMsg = document.getElementById('startMsg');
+        if (startMsg) {
+            startMsg.innerText = "Press any arrow key to start playing again";
+            startMsg.style.display = '';
+        }
         return;
     }
 
@@ -248,6 +259,7 @@ function collision(head, array) {
 
 // Reset button logic
 document.getElementById('resetBtn').onclick = function() {
+    // Reset all game state as if the page was just opened (except high score)
     snake = [{x: 9 * box, y: 10 * box}];
     direction = 'RIGHT';
     food = {
@@ -261,7 +273,14 @@ document.getElementById('resetBtn').onclick = function() {
     started = false;
     document.getElementById('score').innerText = `Score: 0 | High: ${highScore}`;
     clearInterval(game);
-    // Show the start message again
+
+    // Show the initial start message
     const startMsg = document.getElementById('startMsg');
-    if (startMsg) startMsg.style.display = '';
+    if (startMsg) {
+        startMsg.innerText = "Press any arrow key to start";
+        startMsg.style.display = '';
+    }
+
+    // Optionally, clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 };
