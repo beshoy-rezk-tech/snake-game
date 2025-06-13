@@ -18,6 +18,38 @@ const eatSound = document.getElementById('eatSound');
 const gameOverSound = document.getElementById('gameOverSound');
 let brokeHighScore = false;
 
+// Responsive canvas for high-DPI screens
+function resizeCanvas() {
+    let size = Math.min(window.innerWidth, window.innerHeight, 400);
+    canvas.width = size * window.devicePixelRatio;
+    canvas.height = size * window.devicePixelRatio;
+    canvas.style.width = size + "px";
+    canvas.style.height = size + "px";
+    ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// Prevent scrolling on mobile when swiping on canvas or controls
+['touchstart', 'touchmove', 'touchend'].forEach(evt => {
+    document.body.addEventListener(evt, function(e) {
+        if (e.target === canvas || (e.target.classList && e.target.classList.contains('mobile-btn'))) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+});
+
+// Show/hide mobile controls based on device
+function isTouchDevice() {
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+}
+window.addEventListener('DOMContentLoaded', () => {
+    const mobileControls = document.querySelector('.mobile-controls');
+    if (mobileControls) {
+        mobileControls.style.display = isTouchDevice() ? 'flex' : 'none';
+    }
+});
+
 document.getElementById('score').innerText = `Score: 0 | High: ${highScore}`;
 
 document.addEventListener('keydown', function(e) {
