@@ -1,4 +1,3 @@
-/* CSS only */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
 body {
     background: radial-gradient(circle at 50% 30%, #232 60%, #111 100%);
@@ -109,23 +108,22 @@ h2#startMsg {
     100% { transform: scale(1);}
 }
 canvas {
-    background: linear-gradient(135deg, #181818 60%, #232323 100%);
+    width: 90vw !important;
+    height: 90vw !important;
+    max-width: 400px;
+    max-height: 400px;
     display: block;
     margin: auto;
     border: 3px solid #0f0;
     border-radius: 16px;
     box-shadow: 0 0 32px #0f04, 0 0 8px #0f0;
-    transition: box-shadow 0.3s;
-    animation: popIn 1.2s cubic-bezier(.68,-0.55,.27,1.55);
-    width: 400px;
-    height: 400px;
-    max-width: 98vw;
-    max-height: 98vw;
     touch-action: none;
 }
-@keyframes popIn {
-    from { box-shadow: 0 0 0 #0f0; }
-    to { box-shadow: 0 0 32px #0f04, 0 0 8px #0f0; }
+@media (min-width: 600px) {
+    canvas {
+        width: 400px !important;
+        height: 400px !important;
+    }
 }
 #resetBtn {
     margin-top:18px;
@@ -166,47 +164,42 @@ canvas {
     font-family: monospace;
     user-select: none;
 }
-@keyframes foodPulse {
-    0% { box-shadow: 0 0 0 0 #f004; }
-    50% { box-shadow: 0 0 16px 8px #f008; }
-    100% { box-shadow: 0 0 0 0 #f004; }
-}
 .mobile-controls {
-    display: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 18px;
+    margin-bottom: 8px;
+    user-select: none;
 }
-@media (max-width: 600px) {
+.mobile-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+.mobile-btn {
+    width: 64px;
+    height: 64px;
+    margin: 8px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #0f0 60%, #0c0 100%);
+    color: #111;
+    font-size: 2em;
+    font-family: 'Orbitron', monospace;
+    box-shadow: 0 2px 8px #0f04;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    outline: none;
+    font-weight: bold;
+    text-shadow: 0 0 8px #fff, 0 0 2px #0f0;
+}
+.mobile-btn:active {
+    background: linear-gradient(135deg, #0c0 60%, #0f0 100%);
+    transform: scale(1.08);
+}
+@media (min-width: 600px) {
     .mobile-controls {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-top: 18px;
-        margin-bottom: 8px;
-        user-select: none;
-    }
-    .mobile-row {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-    }
-    .mobile-btn {
-        width: 56px;
-        height: 56px;
-        margin: 6px;
-        border-radius: 50%;
-        border: none;
-        background: linear-gradient(135deg, #0f0 60%, #0c0 100%);
-        color: #111;
-        font-size: 2em;
-        font-family: 'Orbitron', monospace;
-        box-shadow: 0 2px 8px #0f04;
-        cursor: pointer;
-        transition: background 0.2s, transform 0.1s;
-        outline: none;
-        font-weight: bold;
-        text-shadow: 0 0 8px #fff, 0 0 2px #0f0;
-    }
-    .mobile-btn:active {
-        background: linear-gradient(135deg, #0c0 60%, #0f0 100%);
-        transform: scale(1.08);
+        display: none;
     }
 }
